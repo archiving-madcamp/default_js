@@ -5,10 +5,37 @@ var mongoose = require('mongoose');
 
 var url = "mongodb://localhost:27017/testdb";
 
-var test_id;
-var test_name;
+var tel;
+var name;
+var nick;
 
 const app = express();
+
+mongoose.connect(url, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+})
+.then(()=>{
+    console.log('connected')
+})
+.catch((err)=>{
+    console.log(err)
+})
+
+const contactSchema = new mongoose.Schema({
+    name: String,
+    tel: String,
+    nick: String,
+},
+{
+    versionKey: false
+})
+
+//module.exports = mongoose.model('hel', contactSchema)
+
+//한번만 만들어야되는데 컬렉션을 여러번 만들어서 오류나는듯함
+var Contact = mongoose.model("contact", contactSchema)
+
 
 let users = [
     {
@@ -39,38 +66,23 @@ app.get('users', (req,res)=>{
 app.post('/post', (req, res)=>{
     console.log('who get in here post /users');
     var inputData;
+    
 
     req.on('data', (data)=>{
         inputData = JSON.parse(data);
     });
 
     req.on('end', ()=>{
-        test_id = inputData.user_id;    //안드로이드에서 키값
-        test_name = inputData.name;
+        name = inputData.name   //안드로이드에서 키값
+        tel = inputData.tel
+        nick = inputData.nick
+
         
         //한번은 올라가 지는데 두번은 안되는 문제
-        mongoose.connect(url, {
-            useNewUrlParser: true,
-            useCreateIndex: true,
-        })
-        .then(()=>{
-            console.log('connected')
-        })
-        .catch((err)=>{
-            console.log(err)
-        })
-
-        const UserSchema = new mongoose.Schema({
-            user_id : String,
-            name: String
-        })
-
-        //한번만 만들어야되는데 컬렉션을 여러번 만들어서 오류나는듯함
-        var User = mongoose.model("hi", UserSchema)
-
-        var me = new User({
-            user_id: test_id,
-            name: test_name
+        var me = new Contact({
+            name: name,
+            tel: tel,
+            nick: nick
         })
 
         me.save()
